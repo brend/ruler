@@ -1,4 +1,4 @@
-use crate::rules::conditions::Product;
+use crate::rules::product::Product;
 
 pub trait Action {
     fn apply(&self, product: Product) -> Product;

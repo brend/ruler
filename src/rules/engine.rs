@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
-use crate::rules::Rule;
-use crate::rules::conditions::Product;
+use crate::rules::{Rule, product::Product};
 
 pub struct RuleRegistry {
     rules: HashMap<String, Vec<Rule>>,

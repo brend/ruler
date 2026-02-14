@@ -1,4 +1,4 @@
-use crate::rules::{conditions::Product, dsl::*, engine::RuleRegistry};
+use crate::rules::{dsl::*, engine::RuleRegistry, product::Product};
 
 mod rules;
 

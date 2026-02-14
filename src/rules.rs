@@ -4,6 +4,7 @@ pub mod actions;
 pub mod conditions;
 pub mod dsl;
 pub mod engine;
+pub mod product;
 
 pub struct Rule {
     pub typeclass: String,
