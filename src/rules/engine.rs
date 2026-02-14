@@ -54,3 +54,88 @@ impl RuleRegistry {
         result
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::rules::dsl::{has, set, typeclass};
+
+    #[test]
+    fn applies_matching_rule_actions() {
+        let mut registry = RuleRegistry::new();
+        typeclass("W600")
+            .when(has("TYP", "W600"))
+            .then(set("TYP", "514"))
+            .and_then(set("GEHAEUSEFORM", "M"))
+            .create(&mut registry);
+
+        let mut product = Product::new("W600");
+        product.set("TYP", "W600");
+
+        let result = registry.apply_rules(product);
+        assert_eq!(result.get("TYP").map(String::as_str), Some("514"));
+        assert_eq!(result.get("GEHAEUSEFORM").map(String::as_str), Some("M"));
+    }
+
+    #[test]
+    fn skips_rules_for_different_typeclass() {
+        let mut registry = RuleRegistry::new();
+        typeclass("W600")
+            .when(has("TYP", "W600"))
+            .then(set("TYP", "514"))
+            .create(&mut registry);
+
+        let mut product = Product::new("W700");
+        product.set("TYP", "W600");
+
+        let result = registry.apply_rules(product);
+        assert_eq!(result.get("TYP").map(String::as_str), Some("W600"));
+    }
+
+    #[test]
+    fn skips_rule_when_condition_does_not_match() {
+        let mut registry = RuleRegistry::new();
+        typeclass("W600")
+            .when(has("GEHAEUSEFORM", "S"))
+            .then(set("GEHAEUSEFORM", "M"))
+            .create(&mut registry);
+
+        let mut product = Product::new("W600");
+        product.set("GEHAEUSEFORM", "X");
+
+        let result = registry.apply_rules(product);
+        assert_eq!(result.get("GEHAEUSEFORM").map(String::as_str), Some("X"));
+    }
+
+    #[test]
+    fn applies_rules_in_registration_order() {
+        let mut registry = RuleRegistry::new();
+        typeclass("W600")
+            .when(has("TYP", "W600"))
+            .then(set("TYP", "514"))
+            .create(&mut registry);
+        typeclass("W600")
+            .when(has("TYP", "514"))
+            .then(set("STATUS", "DERIVED"))
+            .create(&mut registry);
+
+        let mut product = Product::new("W600");
+        product.set("TYP", "W600");
+
+        let result = registry.apply_rules(product);
+        assert_eq!(result.get("TYP").map(String::as_str), Some("514"));
+        assert_eq!(result.get("STATUS").map(String::as_str), Some("DERIVED"));
+    }
+
+    #[test]
+    fn applies_typeclass_rule_without_conditions() {
+        let mut registry = RuleRegistry::new();
+        typeclass("W600")
+            .then(set("FLAG", "ALWAYS"))
+            .create(&mut registry);
+
+        let product = Product::new("W600");
+        let result = registry.apply_rules(product);
+        assert_eq!(result.get("FLAG").map(String::as_str), Some("ALWAYS"));
+    }
+}
