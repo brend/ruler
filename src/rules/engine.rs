@@ -138,4 +138,54 @@ mod tests {
         let result = registry.apply_rules(product);
         assert_eq!(result.get("FLAG").map(String::as_str), Some("ALWAYS"));
     }
+
+    #[test]
+    fn table_driven_rule_application() {
+        struct TestCase {
+            name: &'static str,
+            typeclass: &'static str,
+            initial: Vec<(&'static str, &'static str)>,
+            expected: Vec<(&'static str, Option<&'static str>)>,
+        }
+
+        let cases = vec![
+            TestCase {
+                name: "matching rule updates typ",
+                typeclass: "W600",
+                initial: vec![("TYP", "W600")],
+                expected: vec![("TYP", Some("514"))],
+            },
+            TestCase {
+                name: "missing attribute does not match has",
+                typeclass: "W600",
+                initial: vec![],
+                expected: vec![("TYP", None)],
+            },
+        ];
+
+        for case in cases {
+            let mut registry = RuleRegistry::new();
+            typeclass("W600")
+                .when(has("TYP", "W600"))
+                .then(set("TYP", "514"))
+                .create(&mut registry);
+
+            let mut product = Product::new(case.typeclass);
+            for (key, value) in case.initial {
+                product.set(key, value);
+            }
+
+            let result = registry.apply_rules(product);
+
+            for (key, expected) in case.expected {
+                assert_eq!(
+                    result.get(key).map(String::as_str),
+                    expected,
+                    "case: {} key: {}",
+                    case.name,
+                    key
+                );
+            }
+        }
+    }
 }
