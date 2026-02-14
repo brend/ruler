@@ -16,7 +16,7 @@ impl RuleRegistry {
     pub fn register(&mut self, rule: Rule) {
         self.rules
             .entry(rule.typeclass.clone())
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(rule);
     }
 
@@ -25,8 +25,8 @@ impl RuleRegistry {
 
         if let Some(rules) = self.rules.get(&result.typeclass) {
             for rule in rules {
-                if Self::is_rule_applicable(&rule, &result) {
-                    result = Self::apply_rule(&rule, result);
+                if Self::is_rule_applicable(rule, &result) {
+                    result = Self::apply_rule(rule, result);
                 }
             }
         }
@@ -36,7 +36,7 @@ impl RuleRegistry {
 
     fn is_rule_applicable(rule: &Rule, product: &Product) -> bool {
         for condition in &rule.conditions {
-            if !condition.is_match(&product) {
+            if !condition.is_match(product) {
                 return false;
             }
         }

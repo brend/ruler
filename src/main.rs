@@ -20,4 +20,6 @@ fn main() {
     println!("before: {:?}", product);
     product = rules.apply_rules(product);
     println!(" after: {:?}", product);
+
+    typeclass("P600").then(set("DN", "15"));
 }

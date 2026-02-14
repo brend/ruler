@@ -20,8 +20,6 @@ impl Has {
 
 impl Condition for Has {
     fn is_match(&self, product: &Product) -> bool {
-        product
-            .get(&self.attribute)
-            .map_or(false, |v| v == &self.value)
+        product.get(&self.attribute) == Some(&self.value)
     }
 }
