@@ -21,7 +21,6 @@ impl Has {
 impl Condition for Has {
     fn is_match(&self, product: &Product) -> bool {
         product
-            .attributes
             .get(&self.attribute)
             .map_or(false, |v| v == &self.value)
     }
