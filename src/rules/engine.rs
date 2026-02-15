@@ -64,7 +64,7 @@ impl RuleRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rules::dsl::{has, is, set, typeclass};
+    use crate::rules::dsl::{delete, has, is, set, typeclass};
 
     #[test]
     fn applies_matching_rule_actions() {
@@ -204,5 +204,52 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn delete_removes_existing_attribute_when_rule_matches() {
+        let mut registry = RuleRegistry::new();
+        typeclass("W600")
+            .when(has("REMOVE_ME", "yes"))
+            .then(delete("REMOVE_ME"))
+            .create(&mut registry);
+
+        let mut product = Product::new("W600", "H");
+        product.set("REMOVE_ME", "yes");
+        product.set("KEEP_ME", "yes");
+
+        let result = registry.apply_rules(product);
+        assert_eq!(result.get("REMOVE_ME").map(String::as_str), None);
+        assert_eq!(result.get("KEEP_ME").map(String::as_str), Some("yes"));
+    }
+
+    #[test]
+    fn delete_is_noop_when_attribute_does_not_exist() {
+        let mut registry = RuleRegistry::new();
+        typeclass("W600")
+            .then(delete("MISSING"))
+            .create(&mut registry);
+
+        let mut product = Product::new("W600", "H");
+        product.set("KEEP_ME", "yes");
+
+        let result = registry.apply_rules(product);
+        assert_eq!(result.get("MISSING").map(String::as_str), None);
+        assert_eq!(result.get("KEEP_ME").map(String::as_str), Some("yes"));
+    }
+
+    #[test]
+    fn delete_is_not_applied_when_conditions_fail() {
+        let mut registry = RuleRegistry::new();
+        typeclass("W600")
+            .when(is("K"))
+            .then(delete("REMOVE_ME"))
+            .create(&mut registry);
+
+        let mut product = Product::new("W600", "H");
+        product.set("REMOVE_ME", "yes");
+
+        let result = registry.apply_rules(product);
+        assert_eq!(result.get("REMOVE_ME").map(String::as_str), Some("yes"));
     }
 }

@@ -15,3 +15,7 @@ pub fn is(part: &str) -> ConditionExpr {
 pub fn set(attribute: &str, value: &str) -> ActionExpr {
     ActionExpr::set(attribute, value)
 }
+
+pub fn delete(attribute: &str) -> ActionExpr {
+    ActionExpr::delete(attribute)
+}

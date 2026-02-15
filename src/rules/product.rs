@@ -27,4 +27,8 @@ impl Product {
     pub fn get(&self, key: &str) -> Option<&String> {
         self.attributes.get(key)
     }
+
+    pub fn delete(&mut self, key: &str) {
+        self.attributes.remove(key);
+    }
 }
