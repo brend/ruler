@@ -6,6 +6,12 @@ pub struct RuleRegistry {
     rules: HashMap<String, Vec<Rule>>,
 }
 
+impl Default for RuleRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RuleRegistry {
     pub fn new() -> Self {
         RuleRegistry {
@@ -58,7 +64,7 @@ impl RuleRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rules::dsl::{has, set, typeclass};
+    use crate::rules::dsl::{has, is, set, typeclass};
 
     #[test]
     fn applies_matching_rule_actions() {
@@ -144,6 +150,7 @@ mod tests {
         struct TestCase {
             name: &'static str,
             typeclass: &'static str,
+            part: &'static str,
             initial: Vec<(&'static str, &'static str)>,
             expected: Vec<(&'static str, Option<&'static str>)>,
         }
@@ -152,14 +159,23 @@ mod tests {
             TestCase {
                 name: "matching rule updates typ",
                 typeclass: "W600",
+                part: "H",
                 initial: vec![("TYP", "W600")],
                 expected: vec![("TYP", Some("514"))],
             },
             TestCase {
                 name: "missing attribute does not match has",
                 typeclass: "W600",
+                part: "H",
                 initial: vec![],
                 expected: vec![("TYP", None)],
+            },
+            TestCase {
+                name: "failing the 'is' condition",
+                typeclass: "W600",
+                part: "K",
+                initial: vec![("TYP", "W600")],
+                expected: vec![("TYP", Some("W600"))],
             },
         ];
 
@@ -167,10 +183,11 @@ mod tests {
             let mut registry = RuleRegistry::new();
             typeclass("W600")
                 .when(has("TYP", "W600"))
+                .and(is("H"))
                 .then(set("TYP", "514"))
                 .create(&mut registry);
 
-            let mut product = Product::new(case.typeclass, "H");
+            let mut product = Product::new(case.typeclass, case.part);
             for (key, value) in case.initial {
                 product.set(key, value);
             }

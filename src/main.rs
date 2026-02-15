@@ -1,6 +1,4 @@
-use crate::rules::{dsl::*, engine::RuleRegistry, product::Product};
-
-mod rules;
+use ruler::rules::{dsl::*, engine::RuleRegistry, product::Product};
 
 fn main() {
     let mut rules = RuleRegistry::new();
