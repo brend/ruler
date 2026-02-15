@@ -1,4 +1,4 @@
-use crate::rules::{actions::Action, conditions::Condition, engine::RuleRegistry};
+use crate::rules::{actions::ActionExpr, conditions::ConditionExpr, engine::RuleRegistry};
 
 pub mod actions;
 pub mod conditions;
@@ -8,8 +8,8 @@ pub mod product;
 
 pub struct Rule {
     pub typeclass: String,
-    pub conditions: Vec<Box<dyn Condition>>,
-    pub actions: Vec<Box<dyn Action>>,
+    pub conditions: Vec<ConditionExpr>,
+    pub actions: Vec<ActionExpr>,
 }
 
 pub struct TypeclassRuleBuilder {
@@ -23,14 +23,14 @@ impl TypeclassRuleBuilder {
         }
     }
 
-    pub fn when(self, condition: Box<dyn Condition>) -> ConditionalRuleBuilder {
+    pub fn when(self, condition: ConditionExpr) -> ConditionalRuleBuilder {
         ConditionalRuleBuilder {
             typeclass: self.typeclass,
             conditions: vec![condition],
         }
     }
 
-    pub fn then(self, action: Box<dyn Action>) -> ActionRuleBuilder {
+    pub fn then(self, action: ActionExpr) -> ActionRuleBuilder {
         ActionRuleBuilder {
             typeclass: self.typeclass,
             conditions: vec![],
@@ -41,16 +41,16 @@ impl TypeclassRuleBuilder {
 
 pub struct ConditionalRuleBuilder {
     typeclass: String,
-    conditions: Vec<Box<dyn Condition>>,
+    conditions: Vec<ConditionExpr>,
 }
 
 impl ConditionalRuleBuilder {
-    pub fn and(mut self, condition: Box<dyn Condition>) -> Self {
+    pub fn and(mut self, condition: ConditionExpr) -> Self {
         self.conditions.push(condition);
         self
     }
 
-    pub fn then(self, action: Box<dyn Action>) -> ActionRuleBuilder {
+    pub fn then(self, action: ActionExpr) -> ActionRuleBuilder {
         ActionRuleBuilder {
             typeclass: self.typeclass,
             conditions: self.conditions,
@@ -61,12 +61,12 @@ impl ConditionalRuleBuilder {
 
 pub struct ActionRuleBuilder {
     typeclass: String,
-    conditions: Vec<Box<dyn Condition>>,
-    actions: Vec<Box<dyn Action>>,
+    conditions: Vec<ConditionExpr>,
+    actions: Vec<ActionExpr>,
 }
 
 impl ActionRuleBuilder {
-    pub fn and_then(mut self, action: Box<dyn Action>) -> Self {
+    pub fn and_then(mut self, action: ActionExpr) -> Self {
         self.actions.push(action);
         self
     }

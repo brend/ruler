@@ -1,27 +1,21 @@
 use crate::rules::product::Product;
 
-pub trait Action {
-    fn apply(&self, product: Product) -> Product;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ActionExpr {
+    Set { attribute: String, value: String },
 }
 
-pub struct SetValue {
-    attribute: String,
-    value: String,
-}
-
-impl SetValue {
-    pub fn new(attribute: &str, value: &str) -> Self {
-        SetValue {
+impl ActionExpr {
+    pub fn set(attribute: &str, value: &str) -> Self {
+        Self::Set {
             attribute: attribute.to_string(),
             value: value.to_string(),
         }
     }
-}
 
-impl Action for SetValue {
-    fn apply(&self, product: Product) -> Product {
-        let mut product = product;
-        product.set(&self.attribute, &self.value);
-        product
+    pub fn apply(&self, product: &mut Product) {
+        match self {
+            Self::Set { attribute, value } => product.set(attribute, value),
+        }
     }
 }

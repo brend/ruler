@@ -48,7 +48,7 @@ impl RuleRegistry {
         let mut result = product;
 
         for action in &rule.actions {
-            result = action.apply(result);
+            action.apply(&mut result);
         }
 
         result
