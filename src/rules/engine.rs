@@ -36,7 +36,7 @@ impl RuleRegistry {
 
     fn is_rule_applicable(rule: &Rule, product: &Product) -> bool {
         for condition in &rule.conditions {
-            if !condition.is_match(product) {
+            if !condition.matches(product) {
                 return false;
             }
         }
@@ -69,7 +69,7 @@ mod tests {
             .and_then(set("GEHAEUSEFORM", "M"))
             .create(&mut registry);
 
-        let mut product = Product::new("W600");
+        let mut product = Product::new("W600", "H");
         product.set("TYP", "W600");
 
         let result = registry.apply_rules(product);
@@ -85,7 +85,7 @@ mod tests {
             .then(set("TYP", "514"))
             .create(&mut registry);
 
-        let mut product = Product::new("W700");
+        let mut product = Product::new("W700", "H");
         product.set("TYP", "W600");
 
         let result = registry.apply_rules(product);
@@ -100,7 +100,7 @@ mod tests {
             .then(set("GEHAEUSEFORM", "M"))
             .create(&mut registry);
 
-        let mut product = Product::new("W600");
+        let mut product = Product::new("W600", "H");
         product.set("GEHAEUSEFORM", "X");
 
         let result = registry.apply_rules(product);
@@ -119,7 +119,7 @@ mod tests {
             .then(set("STATUS", "DERIVED"))
             .create(&mut registry);
 
-        let mut product = Product::new("W600");
+        let mut product = Product::new("W600", "H");
         product.set("TYP", "W600");
 
         let result = registry.apply_rules(product);
@@ -134,7 +134,7 @@ mod tests {
             .then(set("FLAG", "ALWAYS"))
             .create(&mut registry);
 
-        let product = Product::new("W600");
+        let product = Product::new("W600", "H");
         let result = registry.apply_rules(product);
         assert_eq!(result.get("FLAG").map(String::as_str), Some("ALWAYS"));
     }
@@ -170,7 +170,7 @@ mod tests {
                 .then(set("TYP", "514"))
                 .create(&mut registry);
 
-            let mut product = Product::new(case.typeclass);
+            let mut product = Product::new(case.typeclass, "H");
             for (key, value) in case.initial {
                 product.set(key, value);
             }

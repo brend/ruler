@@ -8,6 +8,10 @@ pub fn has(attribute: &str, value: &str) -> ConditionExpr {
     ConditionExpr::has(attribute, value)
 }
 
+pub fn is(part: &str) -> ConditionExpr {
+    ConditionExpr::is(part)
+}
+
 pub fn set(attribute: &str, value: &str) -> ActionExpr {
     ActionExpr::set(attribute, value)
 }

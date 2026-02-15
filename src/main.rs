@@ -12,7 +12,7 @@ fn main() {
         .and_then(set("GEHAEUSEFORM", "M"))
         .create(&mut rules);
 
-    let mut product = Product::new("W600");
+    let mut product = Product::new("W600", "H");
 
     product.set("TYP", "W600");
     product.set("GEHAEUSEFORM", "S");
@@ -22,4 +22,6 @@ fn main() {
     println!(" after: {:?}", product);
 
     typeclass("P600").then(set("DN", "15"));
+
+    typeclass("D40").when(is("K")).then(set("DN", "15"));
 }
